@@ -2,9 +2,11 @@ const { readFileSync } = require('fs');
 
 function memory() {
   const memory_used = process.memoryUsage();
-  console.log()
+  console.log();
   console.log(
-    `heapTotal ${Math.round((memory_used.heapTotal / 1024 / 1024) * 100) / 100} MB`
+    `heapTotal ${
+      Math.round((memory_used.heapTotal / 1024 / 1024) * 100) / 100
+    } MB`
   );
 }
 
@@ -19,23 +21,27 @@ const input = (() => {
   //   9899965678
   // `;
 
-  return input.trim()
+  return input
+    .trim()
     .split('\n')
-    .filter(line => line)
+    .filter((line) => line)
     .map((line, y) => {
-      return line.trim().split('').map((int, x) => parseInt(int));
-    })
+      return line
+        .trim()
+        .split('')
+        .map((int, x) => parseInt(int));
+    });
 })();
 console.timeEnd('parse');
 
-function build (input) {
+function build(input) {
   return input.map((row, y) => {
     return row.map((value, x) => ({
       pos: [y, x],
       value,
       is_visited: false,
-    }))
-  })
+    }));
+  });
 }
 
 function* children(data, point) {
@@ -48,7 +54,6 @@ function* children(data, point) {
   if (x + 1 < x_size) yield data[y][x + 1];
 }
 
-
 const y_size = input.length;
 const x_size = input[0].length;
 
@@ -57,16 +62,16 @@ function find_min(input) {
   console.time('find_min');
 
   const min = [];
-  const stack = [data[0][0]]
+  const stack = [data[0][0]];
   while (stack.length) {
-    const point = stack.pop()
+    const point = stack.pop();
 
     point.is_visited = true;
 
     let is_min = true;
     for (const child of children(data, point)) {
       if (!child.is_visited) {
-        stack.push(child)
+        stack.push(child);
         child.is_visited = true;
       }
 
@@ -74,7 +79,7 @@ function find_min(input) {
     }
 
     if (is_min) {
-      min.push(point)
+      min.push(point);
     }
   }
 
@@ -94,19 +99,21 @@ function find_basin(input, min_list) {
     let basin = [min];
     const stack = [min];
     while (stack.length) {
-      const point = stack.pop()
+      const point = stack.pop();
 
       for (const child of children(data, point)) {
         if (child.is_visited) continue;
         if (child.value === 9) continue;
         if (child.value <= point.value) continue;
 
-        stack.push(child)
+        stack.push(child);
 
-        const min_sub_child = Array.from(children(data, child)).reduce((min, sub_child) => {
-          if (sub_child.value < min.value) return sub_child;
-          return min;
-        });
+        const min_sub_child = Array.from(children(data, child)).reduce(
+          (min, sub_child) => {
+            if (sub_child.value < min.value) return sub_child;
+            return min;
+          }
+        );
 
         if (min_sub_child === point) {
           child.is_visited = true;
@@ -116,7 +123,7 @@ function find_basin(input, min_list) {
     }
 
     return basin;
-  })
+  });
 
   console.timeEnd('find_basin');
   return out;
@@ -124,20 +131,18 @@ function find_basin(input, min_list) {
 
 const min = find_min(input);
 
-console.log(min)
+console.log(min);
 const sum = min.reduce((o, point) => {
   return o + point.value + 1;
-}, 0)
-console.log('part1:', sum)
+}, 0);
+console.log('part1:', sum);
 
-
-const basins = find_basin(input, min)
-  .sort((a, b) => b.length - a.length);
-console.log(basins)
+const basins = find_basin(input, min).sort((a, b) => b.length - a.length);
+console.log(basins);
 const product = basins.slice(0, 3).reduce((product, basin) => {
   return product * basin.length;
-}, 1)
-console.log('part2:', product)
+}, 1);
+console.log('part2:', product);
 
-console.log()
-memory()
+console.log();
+memory();
