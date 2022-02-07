@@ -56,55 +56,64 @@ const { start, rules } = (() => {
     );
 })();
 
-console.log(start, rules);
-
 function run(start, rules, step_count) {
-  let curr = start;
+  // Counts of pairs
+  const pair_map = Array.from(start).reduce((o, _, i, arr) => {
+    if (i > start.length - 2) return o;
+
+    const pair = arr.slice(i, i + 2).join('');
+    o[pair] = (o[pair] || 0) + 1;
+
+    return o;
+  }, {});
+
+  // Counts of chars
+  const char_map = Array.from(start).reduce((o, char) => {
+    o[char] = (o[char] || 0) + 1;
+
+    return o;
+  }, {});
 
   for (let step = 0; step < step_count; step++) {
-    let next = [];
-    for (let char = 0, len = curr.length; char < len; char++) {
-      const pair = curr.slice(char, char + 2);
+    for (const [pair, count] of Object.entries(pair_map)) {
       const insert = rules[pair];
 
-      if (insert) {
-        next.push(pair[0], insert);
-      } else {
-        next.push(pair);
+      if (insert && count) {
+        const [start, end] = pair.split('');
+        const a = start + insert;
+        const b = insert + end;
+
+        pair_map[pair] -= count;
+        pair_map[a] = (pair_map[a] || 0) + count;
+        pair_map[b] = (pair_map[b] || 0) + count;
+
+        char_map[insert] = (char_map[insert] || 0) + count;
       }
     }
-
-    curr = next.join('');
   }
 
-  return curr;
-}
-
-function count(str) {
-  const count_map = {};
-  for (const char of str) {
-    count_map[char] = (count_map[char] || 0) + 1;
-  }
-
-  return count_map;
+  return {
+    pair_map,
+    char_map,
+  };
 }
 
 {
   console.time('part1');
-  const out = run(start, rules, 10);
+  const { char_map } = run(start, rules, 10);
   console.timeEnd('part1');
   memory();
 
-  const [first, ...rest] = Object.values(count(out)).sort((a, b) => b - a);
-  console.log('part1:', first - rest.slice(-1));
+  const counts = Object.values(char_map).sort((a, b) => b - a);
+  console.log('part1:', counts[0] - counts.slice(-1));
 }
 
 {
   console.time('part2');
-  const out = run(start, rules, 40);
+  const { char_map } = run(start, rules, 40);
   console.timeEnd('part2');
   memory();
 
-  const [first, ...rest] = Object.values(count(out)).sort((a, b) => b - a);
-  console.log('part2:', first - rest.slice(-1));
+  const counts = Object.values(char_map).sort((a, b) => b - a);
+  console.log('part2:', counts[0] - counts.slice(-1));
 }
