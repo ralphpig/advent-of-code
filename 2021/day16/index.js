@@ -1,5 +1,4 @@
 const { readFileSync } = require('fs');
-const { exit } = require('process');
 
 function memory() {
   const memory_used = process.memoryUsage();
