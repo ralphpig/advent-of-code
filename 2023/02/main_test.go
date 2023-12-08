@@ -15,16 +15,6 @@ var one_test = [][]interface{}{
 	{"Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green", true, 36},
 }
 
-// var two_test = [][]interface{} {
-//     {"two1nine", 29},
-//     {"eightwothree", 83},
-//     {"abcone2threexyz", 13},
-//     {"xtwone3four", 24},
-//     {"4nineeightseven2", 42},
-//     {"zoneight234", 14},
-//     {"7pqrstsixteen", 76},
-// }
-
 func Test(t *testing.T) {
 	var one int
 	var two int
