@@ -16,9 +16,9 @@ export function parse_input(lines: string[]): string[] {
 
 enum Direction {
   Any,
-  TopLeft,
+  UpLeft,
   Up,
-  TopRight,
+  UpRight,
   Left,
   Right,
   DownLeft,
@@ -39,7 +39,7 @@ function neighbors(input: string[], point: Point): Vector[] {
     neighbors.push({
       x: point.x - 1,
       y: point.y - 1,
-      dir: Direction.TopLeft,
+      dir: Direction.UpLeft,
     });
   }
 
@@ -55,7 +55,7 @@ function neighbors(input: string[], point: Point): Vector[] {
     neighbors.push({
       x: point.x + 1,
       y: point.y - 1,
-      dir: Direction.TopRight,
+      dir: Direction.UpRight,
     });
   }
 
@@ -111,21 +111,20 @@ function search(
   chars: string[],
   dir: Direction = Direction.Any,
 ): Point[][] {
-  // console.log({
-  //   start,
-  //   chars,
-  //   dir,
-  // });
-  if (!chars.length) {
-    return [[start]];
-  }
   const next_chars = [...chars];
   const char = next_chars.shift();
+
+  if (at(input, start) !== char) {
+    return [];
+  }
+
+  if (!next_chars.length) {
+    return [[start]];
+  }
 
   const out: Point[][] = [];
   for (const next of neighbors(input, start)) {
     if (dir !== Direction.Any && next.dir !== dir) continue;
-    if (at(input, next) !== char) continue;
 
     const found = search(input, next, next_chars, next.dir);
     if (dir !== Direction.Any && found.length > 1) {
@@ -157,12 +156,8 @@ export function solve_one(input: string[]): number {
           x: Number(char_x),
           y: Number(line_y),
         },
-        ["M", "A", "S"],
+        ["X", "M", "A", "S"],
       );
-
-      // console.log({
-      //   found,
-      // });
 
       total += found.length;
     }
@@ -173,6 +168,68 @@ export function solve_one(input: string[]): number {
 
 export function solve_two(input: string[]): number {
   let total = 0;
+
+  for (const [line_y, line] of Object.entries(input)) {
+    // Skip Edges, since X shape not possible
+    if (Number(line_y) === 0 || Number(line_y) === input.length - 1) {
+      continue;
+    }
+    for (const [char_x, char] of Object.entries(line)) {
+      // Skip Edges, since X shape not possible
+      if (Number(char_x) === 0 || Number(char_x) === line.length - 1) {
+        continue;
+      }
+      if (char !== "A") continue;
+
+      const points = neighbors(input, {
+        x: Number(char_x),
+        y: Number(line_y),
+      });
+
+      const up_left = points.find(({ dir }) => {
+        return dir === Direction.UpLeft;
+      });
+      const up_right = points.find(({ dir }) => {
+        return dir === Direction.UpRight;
+      });
+
+      if (!up_left || !up_right) continue;
+
+      const found_up_left = [
+        search(
+          input,
+          up_left,
+          ["M", "A", "S"],
+          Direction.DownRight,
+        ),
+        search(
+          input,
+          up_left,
+          ["S", "A", "M"],
+          Direction.DownRight,
+        ),
+      ].filter((found) => found.length);
+
+      const found_up_right = [
+        search(
+          input,
+          up_right,
+          ["M", "A", "S"],
+          Direction.DownLeft,
+        ),
+        search(
+          input,
+          up_right,
+          ["S", "A", "M"],
+          Direction.DownLeft,
+        ),
+      ].filter((found) => found.length);
+
+      if (found_up_left.length && found_up_right.length) {
+        total++;
+      }
+    }
+  }
 
   return total;
 }
