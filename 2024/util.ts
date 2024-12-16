@@ -3,7 +3,7 @@ export async function read_file(path: string) {
 }
 export function read_text(text: string) {
   return text
+    .trim()
     .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
+    .map((line) => line.trim());
 }
